@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>World Finance Times — Public crypto news</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --paper: #ffffff;
+        --ink: #141414;
+        --ink-soft: #3d3d3d;
+        --muted: #6f6f6f;
+        --rule: #141414;
+        --hairline: #d9d9d9;
+        --accent: #b42318;
+        --accent-ink: #ffffff;
+        --down: #b42318;
+        --up: #067647;
+        --panel: #f6f5f2;
+        --field: #ffffff;
+        --focus: #175cd3;
+        --ok-bg: #ecfdf3;
+        --ok-ink: #067647;
+        --err-bg: #fef3f2;
+        --err-ink: #b42318;
+        --warn-bg: #fffaeb;
+        --warn-ink: #b54708;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #121212;
+          --ink: #f2f0eb;
+          --ink-soft: #cfccc4;
+          --muted: #9a968c;
+          --rule: #f2f0eb;
+          --hairline: #333230;
+          --accent: #f97066;
+          --accent-ink: #1a0503;
+          --down: #f97066;
+          --up: #32d583;
+          --panel: #1c1c1a;
+          --field: #1c1c1a;
+          --focus: #84adff;
+          --ok-bg: #053321;
+          --ok-ink: #32d583;
+          --err-bg: #55160f;
+          --err-ink: #fda29b;
+          --warn-bg: #4a2e05;
+          --warn-ink: #fec84b;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+      button, input, textarea { font: inherit; }
+      button, input, textarea, select { min-height: 2.75rem; }
+      a { color: var(--accent); }
+
+      .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px 48px; }
+
+      /* ---------- Masthead ---------- */
+      .dateline {
+        display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+        padding: 10px 0 8px;
+        font-size: 0.8rem; letter-spacing: 0.04em; color: var(--muted);
+        border-bottom: 1px solid var(--hairline);
+      }
+      .masthead { text-align: center; padding: 18px 0 14px; border-bottom: 3px double var(--rule); }
+      .masthead h1 {
+        margin: 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 900;
+        font-size: clamp(2.1rem, 7.2vw, 4rem);
+        letter-spacing: 0.01em;
+        line-height: 1.05;
+      }
+      .masthead .tagline { margin: 8px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
+
+      /* ---------- Market strip ---------- */
+      .ticker {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      .tick { padding: 12px 14px 12px 0; }
+      .tick + .tick { border-left: 1px solid var(--hairline); padding-left: 14px; }
+      .tick .sym { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.09em; color: var(--muted); }
+      .tick .price { font-size: clamp(1.25rem, 4.5vw, 1.7rem); font-weight: 700; font-variant-numeric: tabular-nums; }
+      .tick .chg { font-weight: 600; font-size: 0.95rem; }
+      .chg.down { color: var(--down); }
+      .chg.up { color: var(--up); }
+      .fgbar { height: 8px; background: var(--hairline); margin-top: 7px; position: relative; max-width: 220px; }
+      .fgbar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); display: block; }
+      .tick .note { font-size: 0.82rem; color: var(--muted); }
+      .asof { font-size: 0.78rem; color: var(--muted); padding: 6px 0 0; }
+
+      /* ---------- Layout ---------- */
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 36px; margin-top: 26px; align-items: start; }
+      @media (max-width: 860px) { .layout { grid-template-columns: 1fr; gap: 28px; } }
+
+      .section-head {
+        display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+        border-bottom: 2px solid var(--rule); padding-bottom: 8px; margin-bottom: 4px;
+      }
+      .section-head h2 { margin: 0; font-size: 1.05rem; letter-spacing: 0.1em; font-weight: 700; }
+      .refresh-btn {
+        background: none; border: 1px solid var(--ink); color: var(--ink);
+        padding: 0 14px; min-height: 2.25rem; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+      }
+      .refresh-btn:hover { background: var(--ink); color: var(--paper); }
+      .refresh-btn:disabled { opacity: 0.5; cursor: wait; }
+
+      .status {
+        margin: 14px 0 0; padding: 10px 14px; font-size: 0.9rem; display: none;
+      }
+      .status.show { display: block; }
+      .status.ok { background: var(--ok-bg); color: var(--ok-ink); }
+      .status.err { background: var(--err-bg); color: var(--err-ink); }
+      .status.warn { background: var(--warn-bg); color: var(--warn-ink); }
+      .status.info { background: var(--panel); color: var(--ink-soft); }
+
+      /* ---------- Articles ---------- */
+      article.post { padding: 20px 0 22px; border-bottom: 1px solid var(--hairline); }
+      article.post:first-of-type { padding-top: 16px; }
+      article.post h3 {
+        font-family: "Source Serif 4", Georgia, serif;
+        margin: 0 0 8px; font-weight: 600; line-height: 1.25;
+        font-size: 1.3rem;
+      }
+      article.post.lead h3 { font-family: "Playfair Display", Georgia, serif; font-weight: 800; font-size: clamp(1.7rem, 5.4vw, 2.5rem); line-height: 1.15; }
+      article.post p { margin: 0; color: var(--ink-soft); font-size: 1rem; }
+      article.post.lead p { font-size: 1.08rem; }
+      .meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; margin-bottom: 8px; font-size: 0.8rem; color: var(--muted); }
+      .meta .src { font-weight: 700; letter-spacing: 0.05em; color: var(--accent); }
+      .empty { padding: 28px 0; color: var(--muted); }
+
+      /* ---------- Post form ---------- */
+      .composer {
+        background: var(--panel);
+        border-top: 3px solid var(--rule);
+        padding: 18px;
+        position: sticky; top: 16px;
+      }
+      @media (max-width: 860px) { .composer { position: static; } }
+      .composer h2 { margin: 0 0 6px; font-size: 1.05rem; letter-spacing: 0.08em; }
+      .composer .sub { margin: 0 0 16px; font-size: 0.88rem; color: var(--muted); }
+      .composer label { display: block; font-size: 0.85rem; font-weight: 600; margin: 14px 0 6px; }
+      .composer input, .composer textarea {
+        width: 100%; border: 1px solid var(--muted); background: var(--field); color: var(--ink);
+        padding: 10px 12px; border-radius: 0;
+      }
+      .composer textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
+      .composer input:focus, .composer textarea:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+      .post-btn {
+        margin-top: 18px; width: 100%;
+        background: var(--accent); color: var(--accent-ink); border: none;
+        font-weight: 700; letter-spacing: 0.03em; padding: 12px; cursor: pointer; min-height: 3rem;
+      }
+      .post-btn:hover { filter: brightness(1.08); }
+      .post-btn:disabled { opacity: 0.55; cursor: wait; }
+      .form-status { margin: 12px 0 0; font-size: 0.9rem; display: none; }
+      .form-status.show { display: block; }
+      .form-status.ok { color: var(--ok-ink); }
+      .form-status.err { color: var(--err-ink); }
+
+      footer {
+        margin-top: 44px; border-top: 3px double var(--rule); padding-top: 14px;
+        font-size: 0.82rem; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="dateline">
+        <span>Wednesday, November 25, 2026</span>
+        <span>Public edition · Anyone with the link can read it</span>
+      </div>
+
+      <header class="masthead">
+        <h1>World Finance Times</h1>
+        <p class="tagline">Global finance and crypto markets — updated from the newsroom</p>
+      </header>
+
+      <section class="ticker" aria-label="Giá thị trường">
+        <div class="tick">
+          <div class="sym">BITCOIN · BTC/USD</div>
+          <div class="price">59.202 <span style="font-size:0.6em;font-weight:600;">USD</span></div>
+          <div class="chg down">▼ −2,05% / 24 giờ</div>
+        </div>
+        <div class="tick">
+          <div class="sym">ETHEREUM · ETH/USD</div>
+          <div class="price">1.672 <span style="font-size:0.6em;font-weight:600;">USD</span></div>
+          <div class="note">The second-largest crypto by market cap</div>
+        </div>
+        <div class="tick">
+          <div class="sym">FEAR &amp; GREED INDEX</div>
+          <div class="price">9 <span style="font-size:0.6em;font-weight:600;">/ 100</span></div>
+          <div class="fgbar" aria-hidden="true"><i style="width:9%"></i></div>
+          <div class="note">Extreme fear</div>
+        </div>
+      </section>
+      <p class="asof">Market data as of 25/11/2026.</p>
+
+      <div class="layout">
+        <main>
+          <div class="section-head">
+            <h2>LATEST NEWS</h2>
+            <button class="refresh-btn" id="refreshBtn" type="button">↻ Reload</button>
+          </div>
+          <div class="status info show" id="loadStatus" role="status">Loading articles from public storage…</div>
+          <div id="articles"></div>
+        </main>
+
+        <aside class="composer" aria-label="Đăng bài mới">
+          <h2>POST A NEW ARTICLE</h2>
+          <p class="sub">Your post is saved to public storage — anyone opening this link will see it.</p>
+          <form id="postForm">
+            <label for="fTitle">Title</label>
+            <input id="fTitle" name="title" type="text" required maxlength="200" placeholder="Enter the article title" autocomplete="off" />
+            <label for="fBody">Content</label>
+            <textarea id="fBody" name="body" required maxlength="8000" placeholder="Enter the article content"></textarea>
+            <label for="fSource">Source</label>
+            <input id="fSource" name="source" type="text" maxlength="120" placeholder="e.g. Bloomberg, CoinDesk…" autocomplete="off" />
+            <button class="post-btn" id="postBtn" type="submit">Publish publicly</button>
+            <p class="form-status" id="formStatus" role="status"></p>
+          </form>
+        </aside>
+      </div>
+
+      <footer>
+        <span>World Finance Times — public crypto news page.</span>
+        <span>Articles are saved on MantleDB cloud storage.</span>
+      </footer>
+    </div>
+
+    <script>
+      var API = "https://mantledb.sh/v2/world-finance-times-steven-2026/posts";
+
+      var FALLBACK = [
+  {
+    "id": "20261125-1",
+    "title": "Bitcoin funds head for worst month as ETF outflows near $5 billion",
+    "body": "US Bitcoin ETFs net outflow $4.71 billion in November to 23/11, a monthly record. BlackRock IBIT about $4 billion. BTC below $60,000.",
+    "source": "Bloomberg via Moneycontrol",
+    "date": "2026-11-25"
+  },
+  {
+    "id": "20261125-2",
+    "title": "Bitcoin ETFs bleed $570M on Nov 23",
+    "body": "Nov 23 outflow $569.7 million, IBIT $509.3 million, Fidelity FBTC +$13.3 million.",
+    "source": "thecoinrepublic.com",
+    "date": "2026-11-25"
+  },
+  {
+    "id": "20261125-3",
+    "title": "21shares warns Bitcoin selling spiral could deepen, eyes $53K",
+    "body": "Stablecoin supply -$10.7 billion, ETFs -$3.9 billion Oct 30-Nov 13. Support around $53,000-$55,000.",
+    "source": "news.bitcoin.com",
+    "date": "2026-11-25"
+  }
+];
+
+      var currentItems = [];
+      var usingFallback = false;
+
+      var articlesEl = document.getElementById("articles");
+      var loadStatusEl = document.getElementById("loadStatus");
+      var refreshBtn = document.getElementById("refreshBtn");
+      var form = document.getElementById("postForm");
+      var postBtn = document.getElementById("postBtn");
+      var formStatusEl = document.getElementById("formStatus");
+
+      function setLoadStatus(kind, text) {
+        loadStatusEl.className = "status show " + kind;
+        loadStatusEl.textContent = text;
+      }
+      function hideLoadStatus() {
+        loadStatusEl.className = "status";
+        loadStatusEl.textContent = "";
+      }
+      function setFormStatus(kind, text) {
+        formStatusEl.className = "form-status show " + kind;
+        formStatusEl.textContent = text;
+      }
+
+      function formatDate(iso) {
+        if (!iso) return "";
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+        if (!m) return iso;
+        return m[3] + "/" + m[2] + "/" + m[1];
+      }
+
+      function render(items) {
+        articlesEl.textContent = "";
+        if (!items.length) {
+          var empty = document.createElement("p");
+          empty.className = "empty";
+          empty.textContent = "No articles yet. Post the first one using the form.";
+          articlesEl.appendChild(empty);
+          return;
+        }
+        var ordered = items.slice().reverse();
+        ordered.forEach(function (post, idx) {
+          var art = document.createElement("article");
+          art.className = "post" + (idx === 0 ? " lead" : "");
+
+          var meta = document.createElement("div");
+          meta.className = "meta";
+          var src = document.createElement("span");
+          src.className = "src";
+          src.textContent = (post.source || "World Finance Times").toUpperCase();
+          var date = document.createElement("span");
+          date.textContent = formatDate(post.date);
+          meta.appendChild(src);
+          if (post.date) meta.appendChild(date);
+
+          var h = document.createElement("h3");
+          h.textContent = post.title || "(No title)";
+          var p = document.createElement("p");
+          p.textContent = post.body || "";
+
+          art.appendChild(meta);
+          art.appendChild(h);
+          art.appendChild(p);
+          articlesEl.appendChild(art);
+        });
+      }
+
+      function fetchItems() {
+        return fetch(API, { method: "GET", cache: "no-store" }).then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        }).then(function (data) {
+          var items = (data && Array.isArray(data.items)) ? data.items : [];
+          return items.filter(function (p) { return p && typeof p.title === "string"; });
+        });
+      }
+
+      function loadPosts() {
+        refreshBtn.disabled = true;
+        setLoadStatus("info", "Loading articles from public storage…");
+        return fetchItems().then(function (items) {
+          usingFallback = false;
+          currentItems = items;
+          render(currentItems);
+          hideLoadStatus();
+        }).catch(function () {
+          usingFallback = true;
+          currentItems = FALLBACK.slice();
+          render(currentItems);
+          setLoadStatus("warn", "Could not load the storage right now — showing the 3 articles built into this page. Press “Reload” to try again.");
+        }).then(function () {
+          refreshBtn.disabled = false;
+        });
+      }
+
+      refreshBtn.addEventListener("click", loadPosts);
+
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var title = document.getElementById("fTitle").value.trim();
+        var body = document.getElementById("fBody").value.trim();
+        var source = document.getElementById("fSource").value.trim() || "World Finance Times";
+        if (!title || !body) {
+          setFormStatus("err", "Please enter a title and content.");
+          return;
+        }
+        postBtn.disabled = true;
+        postBtn.textContent = "Posting…";
+        setFormStatus("", "");
+
+        // Đọc danh sách mới nhất từ kho, thêm bài mới, rồi POST lại toàn bộ.
+        fetchItems().catch(function () { return currentItems.slice(); }).then(function (items) {
+          var now = new Date();
+          var post = {
+            id: "p" + now.getTime(),
+            title: title,
+            body: body,
+            source: source,
+            date: now.toISOString().slice(0, 10)
+          };
+          var next = items.concat([post]);
+          return fetch(API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: next })
+          }).then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            currentItems = next;
+            usingFallback = false;
+            render(currentItems);
+            hideLoadStatus();
+            form.reset();
+            setFormStatus("ok", "Published — anyone opening this link will see your article.");
+          });
+        }).catch(function () {
+          setFormStatus("err", "Posting failed (storage did not respond). Check your connection and try again.");
+        }).then(function () {
+          postBtn.disabled = false;
+          postBtn.textContent = "Publish publicly";
+        });
+      });
+
+      loadPosts();
+    </script>
+  </body>
+</html>
